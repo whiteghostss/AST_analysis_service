@@ -15,8 +15,6 @@ Java代码AST分析专用后端服务，基于FastAPI构建，专注于使用com
 - **后端框架**：FastAPI + Uvicorn
 - **AST分析工具**：comex（专业代码分析命令行工具）
 - **文件处理**：zipfile、tarfile、rarfile、py7zr
-- **图像处理**：Pillow（用于图像尺寸检测）
-- **图形可视化**：Graphviz（comex依赖）
 
 ## 📋 API接口
 
@@ -64,3 +62,4 @@ comex --help
 # 启动服务
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
+

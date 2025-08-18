@@ -1,65 +1,63 @@
-# AliPathMaker AST Backend
+# AST_analysis_service
 
-Java代码AST分析专用后端服务，基于FastAPI构建，专注于使用comex工具进行高质量的AST分析。
+## 项目简介
 
-## 🚀 功能特性
+本项目为一个 Python 项目，专门分析一个固定的 Java 文件，自动完成以下流程：
 
-- **文件上传与解压**：支持ZIP、TAR、RAR、7Z等多种压缩格式
-- **源码分析**：智能提取Java方法源码
-- **AST分析**：使用comex工具进行专业的AST结构分析
-- **结果打包**：生成包含AST分析结果的ZIP文件
-- **RESTful API**：标准化的API接口设计
+1. 调用 comex 工具对 Java 文件进行 CFG/AST 分析；
+2. 拆分所有控制流路径，每条路径生成独立的 json 文件（paths_json 目录）；
+3. 自动提取方法 AST（output_ast.json）；
+4. 对所有路径进行多维度打分与排序，终端输出详细得分和排序结果；
+5. 无图片、dot 等无关输出，结构简洁，便于后续分析。
 
-## 🛠️ 技术栈
+## 使用说明
 
-- **后端框架**：FastAPI + Uvicorn
-- **AST分析工具**：comex（专业代码分析命令行工具）
-- **文件处理**：zipfile、tarfile、rarfile、py7zr
+1. 修改 `Target.java` 文件内容；
+2. 一键运行分析脚本（推荐）：
 
-## 📋 API接口
+   ```bash
+   bash run_docker.sh
+   ```
 
-### 文件上传
-- `POST /api/upload` - 上传Java源码文件或压缩包
+   该脚本会自动构建镜像并后台启动分析容器。
 
-### 源码分析
-- `POST /api/list-methods` - 列出Java文件中的所有方法
-- `POST /api/get-method-source` - 获取指定方法的源码
+3. 查看分析输出：
 
-### AST分析
-- `POST /api/analyze-ast` - 分析指定session的AST结构
-- `GET /api/get-ast-result/{session_id}` - 获取AST分析结果
+   - 路径 json 文件保存在 `paths_json/` 目录下。
+   - 方法 AST 结构保存在 `output_ast.json`。
+   - 路径得分与排序结果会在容器终端输出，可通过以下命令查看：
+     ```bash
+     docker logs -f ast_analysis_service
+     ```
+   - 或者直接前台运行（便于实时查看输出）：
+     ```bash
+     docker run --rm ast_analysis_service
+     ```
 
-### 结果打包
-- `POST /api/package-ast-result` - 打包AST分析结果
-- `GET /api/download-ast-result/{session_id}` - 直接下载JSON结果
-- `GET /api/list-ast-files/{session_id}` - 列出可用的分析文件
+4. 也可手动构建和运行：
+   ```bash
+   docker build -t ast_analysis_service .
+   docker run --rm ast_analysis_service
+   ```
 
-## 🔧 安装部署
+## 输出目录结构
 
-### 环境要求
-- Python 3.10+
-- Docker（推荐）
-- comex命令行工具（已包含在Docker镜像中）
-
-### Docker部署（推荐）
-
-```bash
-bash deploy.sh
+```
+AST_analysis_service/
+├── main.py
+├── Target.java
+├── Dockerfile
+├── README.md
+├── output.json           # comex 生成的CFG
+├── output_ast.json       # comex 生成的AST
+└── paths_json/           # 拆分出的每条路径json
+    ├── path_1.json
+    ├── path_2.json
+    └── ...
 ```
 
-### 本地部署
+## 结果说明
 
-```bash
-# 安装依赖
-pip install -r requirements.txt
-
-# 安装comex命令行工具
-pip install comex
-
-# 验证comex安装
-comex --help
-
-# 启动服务
-uvicorn main:app --host 0.0.0.0 --port 8000
-```
-
+- 所有路径的详细得分和排序会在终端输出。
+- 每条路径的节点、边、长度等信息保存在 paths_json 目录下。
+- 方法 AST 结构保存在 output_ast.json，便于后续分析。
